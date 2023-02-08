@@ -16,7 +16,6 @@ declare -a packages=(
 	"bqplot"
 	"pythreejs"
 	"ipyleaflet"
-	"elyra[all]"
 )
 
 # Function to check if a package is already installed
@@ -35,7 +34,7 @@ check_installed() {
 check_outdated() {
 	local package="$1"
 	local package_outdated
-	package_outdated=$(conda list --name base --json | jq -r --arg package "$package" '.outdated[] | select(.name == $package)')
+	package_outdated=$(conda list --name base --json | jq -r --arg package "$package" '.installed[] | select(.name == $package and .version != .installed_version)')
 	if [ -n "$package_outdated" ]; then
 		return 0 # true
 	else
