@@ -234,13 +234,17 @@ dependencies:
       - jupyter-server-fileid==0.6.0
       - jupyter-server-mathjax==0.2.6
       - jupyter-server-ydoc==0.6.1
+      - jupyter-ui-poll==0.2.2
       - jupyter-ydoc==0.2.2
       - jupyterlab==3.6.1
       - jupyterlab-git==0.41.0
       - jupyterlab-server==2.19.0
+      - msal==1.21.0
       - multidict==6.0.4
       - nbdime==3.1.1
+      - powerbiclient==2.0.1
       - pydantic==1.10.4
+      - pyjwt==2.6.0
       - python-graphviz==0.20.1
       - s3fs==2023.1.0
       - smmap==5.0.0
