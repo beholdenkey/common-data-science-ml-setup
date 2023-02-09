@@ -17,6 +17,10 @@ declare -a packages=(
 	"jupyter-book"
 )
 
+declare -a pip_packages=(
+	"jupyterlab-git"
+)
+
 # Function to check if a package is already installed
 check_installed() {
 	local package="$1"
@@ -29,7 +33,7 @@ check_installed() {
 	fi
 }
 
-# Function to check if a package is outdated
+# Function to check if a conda package is outdated
 check_outdated() {
 	local package="$1"
 	local package_installed
@@ -44,6 +48,32 @@ check_outdated() {
 		else
 			return 1 # false
 		fi
+	else
+		return 1 # false
+	fi
+}
+
+# Function to check if a pip package is already installed
+check_pip_installed() {
+	local package="$1"
+	local package_installed
+	package_installed=$(pip show "$package" 2>/dev/null)
+	if [ $? -eq 0 ]; then
+		return 0 # true
+	else
+		return 1 # false
+	fi
+}
+
+# Function to check if a pip package is outdated
+check_pip_outdated() {
+	local package="$1"
+	local current_version
+	local installed_version
+	current_version=$(pip show "$package" | awk '/^Version:/ { print $2 }')
+	installed_version=$(pip list --outdated --format=freeze | awk -v package="$package" '$1 == package { print $3 }')
+	if [ "$current_version" != "$installed_version" ]; then
+		return 0 # true
 	else
 		return 1 # false
 	fi
@@ -80,6 +110,25 @@ for package in "${packages[@]}"; do
 	else
 		install_package "$package"
 		updated_flag=1
+	fi
+done
+
+# Loop through the pip packages array
+for pip_package in "${pip_packages[@]}"; do
+	# Check if pip package is already installed
+	check_pip_installed "$pip_package"
+	if [ $? -eq 0 ]; then
+		# Check if pip package is outdated
+		check_pip_outdated "$pip_package"
+		if [ $? -eq 0 ]; then
+			echo "Updating $pip_package..."
+			pip install --upgrade "$pip_package"
+		else
+			echo "$pip_package is already up to date, skipping..."
+		fi
+	else
+		echo "Installing $pip_package..."
+		pip install "$pip_package"
 	fi
 done
 
