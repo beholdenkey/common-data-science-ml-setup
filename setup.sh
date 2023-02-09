@@ -32,6 +32,7 @@ declare -a pip_packages=(
 	"jupyter_scheduler"
 	"voila"
 	"diagrams"
+	"powerbiclient"
 )
 
 # Function to check if a package is already installed
