@@ -12,6 +12,13 @@ I found that time and time again, I spent a lot of time setting up the environme
 - A common set of packages and extensions are available to all projects, including `jupyter` extensions and `conda` packages that are used across multiple projects.
 - Provides a streamlined workflow for data science projects, allowing for a unified and consistent environment for all projects.
 
+### Supported Operating Systems
+
+> Note: This process currently does not work on Windows. I am working on a process for windows using powershell.
+
+- OSX
+- Linux
+
 ## Setting up the Environment
 
 To get started, you will need to install `conda` and `jupyter`. Then, follow these steps to set up the base environment:
