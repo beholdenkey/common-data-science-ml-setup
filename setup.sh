@@ -19,6 +19,7 @@ declare -a packages=(
 
 declare -a pip_packages=(
 	"jupyterlab-git"
+	"diagrams"
 )
 
 # Function to check if a package is already installed
