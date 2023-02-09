@@ -1,25 +1,36 @@
 #!/bin/bash
+
 # Name: setup.sh
 # Purpose: This script is intended to install and update the base conda environment packages I use for my projects.
 
-# If you dont want a specific package to be installed or updated, comment it out in the packages array.
+# If you don't want a specific package to be installed or updated, comment it out in the packages array.
 declare -a packages=(
-	"notebook"
 	"nb_conda_kernels"
 	"jupyter_contrib_nbextensions"
-	"jupyterlab"
 	"pip"
 	"jupytext"
 	"ipywidgets"
 	"bqplot"
 	"pythreejs"
 	"ipyleaflet"
-	"jupyter-book"
+	"numpy"
+	"seaborn"
+	"pandas"
+	"matplotlib"
+	"scipy"
+	"scikit-learn"
+	"libarchive"
+	"ipykernel"
+	"pytz"
 )
 
-# If you dont want a specific pip package to be installed or updated, comment it out in the pip_packages array.
+# If you don't want a specific pip package to be installed or updated, comment it out in the pip_packages array.
 declare -a pip_packages=(
+	"jupyterlab"
+	"notebook"
 	"jupyterlab-git"
+	"jupyter_scheduler"
+	"voila"
 	"diagrams"
 )
 
@@ -27,7 +38,7 @@ declare -a pip_packages=(
 check_installed() {
 	local package="$1"
 	local package_installed
-	package_installed=$(conda list --name base | grep -E "^$package ")
+	package_installed=$(conda list --name base --explicit | awk -v package="$package" '$1 == package')
 	if [ -n "$package_installed" ]; then
 		return 0 # true
 	else
@@ -41,10 +52,10 @@ check_outdated() {
 	local package_installed
 	local current_version
 	local installed_version
-	package_installed=$(conda list --name base | grep -E "^$package ")
+	package_installed=$(conda list --name base --explicit | awk -v package="$package" '$1 == package { print $2 }')
 	if [ -n "$package_installed" ]; then
-		current_version=$(conda search --info "$package" | awk '/^Version:/ { print $2 }')
-		installed_version=$(echo "$package_installed" | awk '{ print $2 }')
+		current_version=$(conda search --info "$package" | awk -F ': ' '/^Version:/ { print $2 }')
+		installed_version=$(echo "$package_installed")
 		if [ "$current_version" != "$installed_version" ]; then
 			return 0 # true
 		else
@@ -73,7 +84,7 @@ check_pip_outdated() {
 	local current_version
 	local installed_version
 	current_version=$(pip show "$package" | awk '/^Version:/ { print $2 }')
-	installed_version=$(pip list --format=columns | awk -v package="$package" '$1 == package { print $2 }')
+	installed_version=$(pip show "$package" | awk '/^Version:/ { print $2 }')
 	if [ "$current_version" != "$installed_version" ]; then
 		return 0 # true
 	else
@@ -115,7 +126,6 @@ for package in "${packages[@]}"; do
 	fi
 done
 
-# Loop through the pip packages array
 for pip_package in "${pip_packages[@]}"; do
 	# Check if pip package is already installed
 	check_pip_installed "$pip_package"
@@ -134,7 +144,11 @@ for pip_package in "${pip_packages[@]}"; do
 	fi
 done
 
-# Rebuild JupyterLab if any packages were updated
+jupyter contrib nbextension install --user
+
+# Configure npm to not use SSL
+conda config --set ssl_verify False
+
 if [ $updated_flag -eq 1 ]; then
 	echo "Rebuilding JupyterLab..."
 	jupyter lab build
