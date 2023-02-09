@@ -3,26 +3,25 @@
 # Name: setup.sh
 # Purpose: This script is intended to install and update the base conda environment packages I use for my projects.
 
-# Define an array of packages to install
 declare -a packages=(
 	"notebook"
 	"nb_conda_kernels"
 	"jupyter_contrib_nbextensions"
 	"jupyterlab"
 	"pip"
-	"jupyterlab-git"
 	"jupytext"
 	"ipywidgets"
 	"bqplot"
 	"pythreejs"
 	"ipyleaflet"
+	"jupyter-book"
 )
 
 # Function to check if a package is already installed
 check_installed() {
 	local package="$1"
 	local package_installed
-	package_installed=$(conda list --name base --json | jq -r --arg package "$package" '.installed[] | select(.name == $package)')
+	package_installed=$(conda list --name base | grep -E "^$package ")
 	if [ -n "$package_installed" ]; then
 		return 0 # true
 	else
@@ -33,10 +32,18 @@ check_installed() {
 # Function to check if a package is outdated
 check_outdated() {
 	local package="$1"
-	local package_outdated
-	package_outdated=$(conda list --name base --json | jq -r --arg package "$package" '.installed[] | select(.name == $package and .version != .installed_version)')
-	if [ -n "$package_outdated" ]; then
-		return 0 # true
+	local package_installed
+	local current_version
+	local installed_version
+	package_installed=$(conda list --name base | grep -E "^$package ")
+	if [ -n "$package_installed" ]; then
+		current_version=$(conda search --info "$package" | awk '/^Version:/ { print $2 }')
+		installed_version=$(echo "$package_installed" | awk '{ print $2 }')
+		if [ "$current_version" != "$installed_version" ]; then
+			return 0 # true
+		else
+			return 1 # false
+		fi
 	else
 		return 1 # false
 	fi
@@ -80,6 +87,16 @@ done
 if [ $updated_flag -eq 1 ]; then
 	echo "Rebuilding JupyterLab..."
 	jupyter lab build
+else
+	echo "No packages were updated, skipping JupyterLab rebuild."
+fi
+
+# Export the base environment to a file
+echo "Exporting the base environment to environment-base.yaml..."
+if conda env export --name base >environment-base.yaml; then
+	echo "Successfully exported the base environment to environment-base.yaml."
+else
+	echo "Failed to export the base environment. environment-base.yaml was not overwritten."
 fi
 
 # Display success message
