@@ -3,6 +3,8 @@
 # Name: setup.sh
 # Purpose: This script is intended to install and update the base conda environment packages I use for my projects.
 
+conda config --add channels conda-forge
+
 # If you don't want a specific package to be installed or updated, comment it out in the packages array.
 declare -a packages=(
 	"nb_conda_kernels"
@@ -22,6 +24,7 @@ declare -a packages=(
 	"libarchive"
 	"ipykernel"
 	"pytz"
+	"cookiecutter"
 )
 
 # If you don't want a specific pip package to be installed or updated, comment it out in the pip_packages array.

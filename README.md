@@ -77,6 +77,7 @@ With this common platform for data science and machine learning, you can now bui
 
 ### References
 
+- [Cookiecutter Data Science](https://drivendata.github.io/cookiecutter-data-science/)
 - [Conda Cheat sheet](https://conda.io/projects/conda/en/latest/user-guide/cheatsheet.html)
 - [Jupyter Lab](https://jupyterlab.readthedocs.io/en/stable/)
 - [Conda](https://docs.conda.io/en/latest/)
