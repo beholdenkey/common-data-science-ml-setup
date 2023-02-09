@@ -72,7 +72,7 @@ check_pip_outdated() {
 	local current_version
 	local installed_version
 	current_version=$(pip show "$package" | awk '/^Version:/ { print $2 }')
-	installed_version=$(pip list --outdated --format=freeze | awk -v package="$package" '$1 == package { print $3 }')
+	installed_version=$(pip list --format=columns | awk -v package="$package" '$1 == package { print $2 }')
 	if [ "$current_version" != "$installed_version" ]; then
 		return 0 # true
 	else
