@@ -1,5 +1,13 @@
-# Name: setup.ps1
-# Purpose: This script is intended to install and update the base conda environment packages I use for my projects.
+<#
+    .SYNOPSIS
+        Installs and updates packages for the base environment.
+    .DESCRIPTION
+        This script installs and updates packages for the base environment.
+    .NOTES
+        File Name: setup.ps1
+        Compatible Operating Systems: Windows
+        Prerequisites: Anaconda or Miniconda
+#>
 
 $channels = conda config --get channels
 if (!$channels.Contains("conda-forge")) {
@@ -135,6 +143,9 @@ foreach ($package in $packages) {
     }
 }
 
+Write-Output "Updating all conda packages..."
+conda update --all
+
 foreach ($pip_package in $pip_packages) {
     # Check if pip package is already installed
     if (check_pip_installed $pip_package) {
@@ -153,10 +164,13 @@ foreach ($pip_package in $pip_packages) {
     }
 }
 
+
 jupyter contrib nbextension install --user
 
-# Configure npm to not use SSL
-conda config --set ssl_verify False
+$ssl_verify = conda config --get ssl_verify
+if ($ssl_verify -ne "False") {
+    conda config --set ssl_verify False
+}
 
 if ($updated_flag -eq 1) {
     Write-Output "Rebuilding JupyterLab..."
