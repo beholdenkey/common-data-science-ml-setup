@@ -9,10 +9,17 @@
         Prerequisites: Anaconda or Miniconda
 #>
 
-$channels = conda config --get channels
-if (!$channels.Contains("conda-forge")) {
-    conda config --add channels conda-forge
+try {
+    $channels = conda config --get channels
+    if (!$channels.Contains("conda-forge")) {
+        conda config --add channels conda-forge
+    }
 }
+catch {
+    Write-Error "Error: Unable to configure conda channels: $_"
+    exit 1
+}
+
 
 # If you don't want a specific package to be installed or updated, comment it out in the packages array.
 $packages = @(
@@ -46,8 +53,6 @@ $pip_packages = @(
     "diagrams",
     "powerbiclient"
 )
-
-# Function to check if a package is already installed
 function check_installed {
     param($package)
     $package_installed = (conda list --name base --explicit | Select-String $package).Line
@@ -65,7 +70,7 @@ function check_outdated {
     $package_installed = (conda list --name base --explicit | Select-String $package).Line -split " "
     if ($package_installed) {
         if (!(conda search --info $package | Select-String "Version:")) {
-            Write-Output "Error: Unable to find information for package $package"
+            Write-Error "Error: Unable to find information for package $package"
             return $false
         }
         $current_version = (conda search --info $package | Select-String "Version:").Line.Split(": ")[1]
@@ -95,19 +100,25 @@ function check_pip_installed {
     }
 }
 
-# Function to check if a pip package is outdated
+
 function check_pip_outdated {
     param($package)
-    $current_version = (pip show $package | Select-String "Version:").Line.Split(": ")[1]
-    $installed_version = (pip show $package | Select-String "Version:").Line.Split(": ")[1]
-    if ($current_version -ne $installed_version) {
-        return $true
+    try {
+        $installed_version = (pip show $package | Select-String "Version:").Line.Split(": ")[1]
+        $latest_version = (pip show $package | Select-String "Latest:").Line.Split(": ")[1].Trim()
+        if ($installed_version -ne $latest_version) {
+            return $true
+        }
+        else {
+            return $false
+        }
     }
-    else {
-        return
-        $false
+    catch {
+        Write-Error "Error: Unable to check the version of package $($package): $_"
+        return $false
     }
 }
+
 
 # Function to install a package
 function install_package {
@@ -187,8 +198,9 @@ try {
     Write-Output "Successfully exported the base environment to environment-base.yaml."
 }
 catch {
-    Write-Output "Failed to export the base environment. environment-base.yaml was not overwritten."
+    Write-Error "Failed to export the base environment. environment-base.yaml was not overwritten: $_"
+    exit 1
 }
 
 # Display success message
-Write-Output "All packages have been installed and updated successfully!"
+Write-Output "All packages have been installed and updated"
