@@ -1,7 +1,10 @@
 # Name: setup.ps1
 # Purpose: This script is intended to install and update the base conda environment packages I use for my projects.
 
-conda config --add channels conda-forge
+$channels = conda config --get channels
+if (!$channels.Contains("conda-forge")) {
+    conda config --add channels conda-forge
+}
 
 # If you don't want a specific package to be installed or updated, comment it out in the packages array.
 $packages = @(
