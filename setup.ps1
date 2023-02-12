@@ -53,6 +53,10 @@ function check_outdated {
     param($package)
     $package_installed = (conda list --name base --explicit | Select-String $package).Line -split " "
     if ($package_installed) {
+        if (!(conda search --info $package | Select-String "Version:")) {
+            Write-Output "Error: Unable to find information for package $package"
+            return $false
+        }
         $current_version = (conda search --info $package | Select-String "Version:").Line.Split(": ")[1]
         $installed_version = $package_installed[1]
         if ($current_version -ne $installed_version) {
@@ -66,6 +70,7 @@ function check_outdated {
         return $false
     }
 }
+
 
 # Function to check if a pip package is already installed
 function check_pip_installed {
