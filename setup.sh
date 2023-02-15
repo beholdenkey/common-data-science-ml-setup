@@ -4,6 +4,7 @@
 # Purpose: This script is intended to install and update the base conda environment packages I use for my projects.
 
 conda config --add channels conda-forge
+conda config --set channel_priority strict
 
 # If you don't want a specific package to be installed or updated, comment it out in the packages array.
 declare -a packages=(
@@ -25,6 +26,7 @@ declare -a packages=(
 	"ipykernel"
 	"pytz"
 	"cookiecutter"
+	"pypdf2"
 )
 
 # If you don't want a specific pip package to be installed or updated, comment it out in the pip_packages array.
