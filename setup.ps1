@@ -1,3 +1,5 @@
+#!/usr/bin/env pwsh
+
 <#
 .SYNOPSIS
     Installs and updates packages for the base environment.
@@ -8,19 +10,10 @@
     Compatible Operating Systems: Windows
     Prerequisites: Anaconda or Miniconda
 #>
-<#
-.SYNOPSIS
-    Installs and updates packages for the base environment.
-.DESCRIPTION
-    This script installs and updates packages for the base environment.
-.NOTES
-    File Name: setup.ps1
-    Compatible Operating Systems: Windows
-    Prerequisites: Anaconda or Miniconda
-#>
+
 # Define commonly used parameters
 $conda_channel_name = "conda-forge"
-$conda_ssl_verify_flag = "False"
+$conda_ssl_verify_flag = $false
 
 # Set strict channel priority
 conda config --set channel_priority strict
@@ -64,6 +57,18 @@ function check_conda_installed {
     }
     catch {
         Write-Error "Error: Unable to check if package $package is installed: $_"
+        return $false
+    }
+}
+
+# Check if a pip package is installed
+function check_pip_installed {
+    param($package)
+    try {
+        $package_installed = (pip show $package -ErrorAction Stop)
+        return $package_installed
+    }
+    catch {
         return $false
     }
 }
@@ -114,15 +119,9 @@ else {
 }
 
 # Export the base environment to a file
-Write-Output "Exporting the base environment to environment-base.yaml..."
-try {
-    conda env export --name base > environment-base.yaml
-    Write-Output "Successfully exported the base environment to environment-base.yaml."
-}
-catch {
-    Write-Error "Failed to export the base environment. environment-base.yaml was not overwritten: $_"
-    exit 1
-}
+$env_file = "environment.yaml"
+Write-Output "Exporting the base environment to $env_file"
+conda env export --name base --no-builds --file $env_file
 
 # Display success message
 Write-Output "All packages have been installed and updated"
